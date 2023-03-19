@@ -10,7 +10,7 @@
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:padding="10sp"
-        android:background="@drawable/background">
+        android:background="@drawable/dialog_background">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/city_Input"
@@ -38,7 +38,7 @@
                 android:layout_margin="5sp"
                 android:layout_weight="1"
                 android:text="Cancel"
-                android:backgroundTint="#122259"/>
+                android:backgroundTint="#2E86C1"/>
 
             <Button
                 android:id="@+id/enter_Button"
@@ -47,7 +47,7 @@
                 android:layout_margin="5sp"
                 android:layout_weight="1"
                 android:text="Enter"
-                android:backgroundTint="#122259"/>
+                android:backgroundTint="#2E86C1"/>
 
         </LinearLayout>
 

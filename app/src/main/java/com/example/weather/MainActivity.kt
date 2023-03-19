@@ -9,6 +9,9 @@ import android.location.Address
 import android.location.Geocoder
 import android.location.LocationManager
 import android.os.Bundle
+import android.view.View
+import android.view.WindowInsets
+import android.view.WindowInsetsController
 import android.view.WindowManager
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
@@ -27,7 +30,6 @@ import com.example.weather.model_classes.days_model
 import com.example.weather.model_classes.hours_model
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
-import org.intellij.lang.annotations.JdkConstants.HorizontalAlignment
 import java.util.*
 
 class MainActivity : AppCompatActivity(), adapter.click, DaysAdapter.click {
@@ -75,14 +77,15 @@ class MainActivity : AppCompatActivity(), adapter.click, DaysAdapter.click {
 
 
 
-
         mviewmodelclass =
             ViewModelProvider(this, viewmodelfactory(repository))[viewmodelclass::class.java]
 
         binding.myLocation.setOnClickListener {
+            binding.progressbar.visibility = View.VISIBLE
             if (accessLocation()) {
                 if (islocationEnable()) {
                     mFusedLocationClient.lastLocation.addOnSuccessListener {
+                        // binding.progressbar.visibility = View.VISIBLE
                         if (it != null) {
                             val geocoder = Geocoder(this, Locale.getDefault())
                             val list: List<Address> =
@@ -107,12 +110,16 @@ class MainActivity : AppCompatActivity(), adapter.click, DaysAdapter.click {
             }
         }
 
+
+
+
         binding.dialogShow.setOnClickListener {
             dialog()
         }
         // mviewmodelclass.modelCitydata(newaddress!!)
 
         mviewmodelclass.modelgetdata.observe(this@MainActivity) {
+            // binding.progressbar.visibility = View.VISIBLE
             val rightnow = Calendar.getInstance()
             val hourofday = rightnow.get(Calendar.HOUR_OF_DAY)
             val minutesofday = rightnow.get(Calendar.MINUTE)
@@ -149,7 +156,9 @@ class MainActivity : AppCompatActivity(), adapter.click, DaysAdapter.click {
                 pressureValue.text = it.days[0].hours[hour].pressure.toString()
                 windSpeed.text = it.days[0].hours[hour].windspeed.toString()
                 humidityValue.text = it.days[0].hours[hour].humidity.toString()
+                binding.progressbar.visibility = View.GONE
             }
+
         }
     }
 
@@ -224,8 +233,8 @@ class MainActivity : AppCompatActivity(), adapter.click, DaysAdapter.click {
     }
 
 
-    private fun islocationEnable(): Boolean {
 
+    private fun islocationEnable(): Boolean {
         val locationManager: LocationManager =
             getSystemService(Context.LOCATION_SERVICE) as LocationManager
         return locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)
@@ -234,13 +243,11 @@ class MainActivity : AppCompatActivity(), adapter.click, DaysAdapter.click {
         )
     }
 
-
     private fun requestPermission() {
         ActivityCompat.requestPermissions(
             this, arrayOf(
                 android.Manifest.permission.ACCESS_COARSE_LOCATION,
                 android.Manifest.permission.ACCESS_FINE_LOCATION
-
             ), 123
         )
     }
@@ -259,24 +266,23 @@ class MainActivity : AppCompatActivity(), adapter.click, DaysAdapter.click {
     }
 
     private fun accessLocation(): Boolean {
-        if (ActivityCompat.checkSelfPermission(
-                this,
-                android.Manifest.permission.ACCESS_FINE_LOCATION
-            )
-            == PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
-                this,
-                android.Manifest.permission.ACCESS_COARSE_LOCATION
-            ) == PackageManager.PERMISSION_GRANTED
-        ) {
-            return true
-        }
-        return false
+        return (ActivityCompat.checkSelfPermission(
+            this,
+            android.Manifest.permission.ACCESS_FINE_LOCATION
+        )
+                == PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
+            this,
+            android.Manifest.permission.ACCESS_COARSE_LOCATION
+        ) == PackageManager.PERMISSION_GRANTED)
+
 
     }
 
+    @SuppressLint("SetTextI18n")
     override fun onclick(hoursModel: hours_model, position: Int) {
-
+        binding.progressbar.visibility = View.VISIBLE
         mviewmodelclass.modelgetdata.observe(this@MainActivity) {
+
             val rightnow = Calendar.getInstance()
             val hourofday = rightnow.get(Calendar.HOUR_OF_DAY)
             val minutesofday = rightnow.get(Calendar.MINUTE)
@@ -311,13 +317,15 @@ class MainActivity : AppCompatActivity(), adapter.click, DaysAdapter.click {
                 pressureValue.text = it.days[0].hours[position + 1].pressure.toString()
                 windSpeed.text = it.days[0].hours[position + 1].windspeed.toString()
                 humidityValue.text = it.days[0].hours[position + 1].humidity.toString()
+                binding.progressbar.visibility = View.GONE
             }
         }
     }
 
+    @SuppressLint("SetTextI18n")
     override fun onclick(daysModel: days_model, position: Int) {
-
         mviewmodelclass.modelgetdata.observe(this@MainActivity) {
+
             val rightnow = Calendar.getInstance()
             val hourofday = rightnow.get(Calendar.HOUR_OF_DAY)
             val minutesofday = rightnow.get(Calendar.MINUTE)
@@ -352,16 +360,17 @@ class MainActivity : AppCompatActivity(), adapter.click, DaysAdapter.click {
                 pressureValue.text = it.days[position + 1].hours[hour].pressure.toString()
                 windSpeed.text = it.days[position + 1].hours[hour].windspeed.toString()
                 humidityValue.text = it.days[position + 1].hours[hour].humidity.toString()
+                // binding.progressbar.visibility = View.VISIBLE
+
             }
 
         }
     }
 
-    fun dialog() {
+    private fun dialog() {
         val dialog = Dialog(this)
         dialog.setContentView(R.layout.dialog_layout)
         val textcity: EditText = dialog.findViewById(R.id.city_Input)
-
 
         val cancel: Button = dialog.findViewById(R.id.cancel_Button)
         val enter: Button = dialog.findViewById(R.id.enter_Button)
@@ -370,12 +379,15 @@ class MainActivity : AppCompatActivity(), adapter.click, DaysAdapter.click {
             dialog.dismiss()
         }
         enter.setOnClickListener {
+            binding.progressbar.visibility = View.VISIBLE
             val city_text = textcity.text.toString()
             if (city_text.isNotBlank()) {
                 mviewmodelclass.modelCitydata(city_text)
                 dialog.dismiss()
-            }
-            else{
+                binding.mainContainer.visibility = View.VISIBLE
+
+                // binding.outerRL.visibility = View.GONE
+            } else {
                 Toast.makeText(this, "Please Enter City Name", Toast.LENGTH_SHORT).show()
             }
         }
